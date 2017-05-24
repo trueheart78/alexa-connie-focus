@@ -6,7 +6,7 @@ class ResponseHandler
   class << self
     def next
       load_responses
-      response = responses.pop
+      response = responses.shuffle.pop
       save_responses
       response
     end
