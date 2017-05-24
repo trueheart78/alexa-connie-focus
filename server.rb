@@ -11,6 +11,11 @@ class ResponseHandler
       response
     end
 
+    def reset
+      @responses = response_list
+      save_responses
+    end
+
     private
 
     attr_reader :responses
@@ -63,8 +68,20 @@ class ResponseHandler
   end
 end
 
+def reset?(request_body)
+  req = AlexaRubykit::Request.new JSON.parse(request_body)
+  req.json['request']['type'] == 'IntentRequest' && req.json['request']['intent']['name'] == 'AMAZON.StartOverIntent'
+rescue JSON::ParserError
+end
+
 post '/pay_attention' do
+  ResponseHandler.reset if reset? request.body.read
   response = AlexaRubykit::Response.new
   response.add_speech ResponseHandler.next
   return response.build_response
+end
+
+post '/reset' do
+  ResponseHandler.reset
+  [200, [], '']
 end
